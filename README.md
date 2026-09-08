@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 [![Model](https://img.shields.io/badge/model-MuseTalk%201.5%20%28MLX%29-8A2BE2)](https://huggingface.co/mlx-community/MuseTalk-1.5-fp16)
 
-> **English TL;DR** — Turn one person's source video plus any audio file into a lip-synced talking video, entirely offline on an Apple Silicon Mac — free, scriptable, batchable. Built on the MLX port of MuseTalk 1.5, it keeps per-avatar landmark caches (detect once, reuse forever), ships a Gradio production UI with a batch queue, and renders long audio in resumable 30-second chunks with seamless ping-pong looping. Measured on a base M2 (24 GB): 3.9 faces/s bench, ~2.6 fps rendering — a 7 min 22 s episode takes ~86 min of pure compute, zero GPU cost. Pairs with [voxclone-mac](https://github.com/Shihfeng-Hsu/voxclone-mac) for cloned voiceovers.
+> **English TL;DR** — Turn one person's source video plus any audio file into a lip-synced talking video, entirely offline on an Apple Silicon Mac — free, scriptable, batchable. Built on the MLX port of MuseTalk 1.5, it keeps per-avatar landmark caches (detect once, reuse forever), ships a Gradio production UI with a batch queue, and renders long audio in resumable 30-second chunks with seamless ping-pong looping. Measured on a base M2 (24 GB): 3.9 faces/s bench, ~2.6 fps rendering — a 7 min 22 s video takes ~86 min of pure compute, zero GPU cost. Pairs with [voxclone-mac](https://github.com/Shihfeng-Hsu/voxclone-mac) for cloned voiceovers.
 
 在 **Apple Silicon Mac** 上,把「一位人物的影片 + 任意音檔」變成嘴型同步的講話影片 — 全程本機、免費、可批次。基於 [MuseTalk 1.5](https://github.com/TMElyralab/MuseTalk) 的 MLX 移植版,自帶多 avatar 快取、圖形化介面與批次佇列。
 
@@ -31,10 +31,10 @@
 - **Gradio 產片台**:產片 / 新增 avatar / 批次三個分頁,關掉瀏覽器渲染照跑
 - **批次佇列**:音檔丟進 `inbox/`,一條指令整批渲染,成品落 `outbox/`,失敗自動留原地重跑續傳
 - **分塊渲染**:長片自動切成 30 秒段,可中斷(Ctrl-C)、可續傳,最後無損接合
-- **跨集隔離**:分段與 whisper 特徵快取按音檔內容 md5 分目錄,換下一集不會吃到上一集的嘴型
+- **跨任務快取隔離**:分段與 whisper 特徵快取按音檔內容 md5 分目錄,換下一支影片不會吃到上一支的嘴型
 - **無縫循環**:基底影片過短時,正播+倒播(乒乓)素材配合幀循環,切點乾淨不破圖
 
-> 這台機器的定位是**離線產片器**(M2 實測 2.6 fps,做不了 30 fps 即時主播)。訓練/微調請用 CUDA 設備。
+> Mac 的定位是**離線產片器**(M2 實測 2.6 fps,做不了 30 fps 即時)。訓練/微調請用 CUDA 設備。
 
 ## 環境需求
 
@@ -75,8 +75,8 @@ setup 腳本是**冪等**的(重跑只補缺的),它會:
 # 註冊 avatar(一次性地標偵測,之後永久重用)
 muse.sh avatar-add myanchor ~/來源影片.mp4
 
-# 單集產片
-caffeinate -is muse.sh render myanchor ~/某集.mp3 ~/out_ep01.mp4
+# 單支產片
+caffeinate -is muse.sh render myanchor ~/某支音檔.mp3 ~/out_video.mp4
 
 # 整批:把音檔丟進 inbox/,然後
 caffeinate -is muse.sh batch myanchor
@@ -128,9 +128,9 @@ work/                           執行期中繼(可整包刪,自動重建)
 | 項目 | 耗時 | 頻率 |
 |---|---|---|
 | MLX bench | 3.9 faces/s | 驗機一次 |
-| 渲染 | 2.6 fps ≈ 每 1 分鐘音檔 12 分鐘 | 每集 |
+| 渲染 | 2.6 fps ≈ 每 1 分鐘音檔 12 分鐘 | 每支影片 |
 | 地標偵測 | 約每 30 幀 1 分鐘(CPU) | 每 avatar 一次 |
-| 音檔特徵編碼 | 約 1 分鐘 | 每集一次 |
+| 音檔特徵編碼 | 約 1 分鐘 | 每支影片一次 |
 
 ## 常見狀況
 
