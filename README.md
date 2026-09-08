@@ -1,8 +1,29 @@
 # muse-mac-lipsync
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Platform](https://img.shields.io/badge/platform-macOS%20Apple%20Silicon-black)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+[![Model](https://img.shields.io/badge/model-MuseTalk%201.5%20%28MLX%29-8A2BE2)](https://huggingface.co/mlx-community/MuseTalk-1.5-fp16)
+
+> **English TL;DR** — Turn one person's source video plus any audio file into a lip-synced talking video, entirely offline on an Apple Silicon Mac — free, scriptable, batchable. Built on the MLX port of MuseTalk 1.5, it keeps per-avatar landmark caches (detect once, reuse forever), ships a Gradio production UI with a batch queue, and renders long audio in resumable 30-second chunks with seamless ping-pong looping. Measured on a base M2 (24 GB): 3.9 faces/s bench, ~2.6 fps rendering — a 7 min 22 s episode takes ~86 min of pure compute, zero GPU cost. Pairs with [voxclone-mac](https://github.com/Shihfeng-Hsu/voxclone-mac) for cloned voiceovers.
+
 在 **Apple Silicon Mac** 上,把「一位人物的影片 + 任意音檔」變成嘴型同步的講話影片 — 全程本機、免費、可批次。基於 [MuseTalk 1.5](https://github.com/TMElyralab/MuseTalk) 的 MLX 移植版,自帶多 avatar 快取、圖形化介面與批次佇列。
 
 在 M2(24GB)上實測:**7 分 22 秒的整片一次跑完**,純渲染 86 分鐘(2.6 fps,含散熱休息約 2.5 小時),零 GPU 費用。
+
+## 目錄
+
+- [環境需求](#環境需求)
+- [安裝](#安裝)
+- [快速開始(GUI)](#快速開始gui)
+- [快速開始(CLI)](#快速開始cli)
+- [調速參數](#調速參數)
+- [目錄結構](#目錄結構)
+- [成本與速度(M2 24GB 實測)](#成本與速度m2-24gb-實測)
+- [常見狀況](#常見狀況)
+- [備份](#備份)
+- [負責任使用](#負責任使用)
+- [授權與致謝](#授權與致謝)
 
 ## 特色
 
@@ -24,7 +45,7 @@
 ## 安裝
 
 ```bash
-git clone https://github.com/<你的帳號>/muse-mac-lipsync.git
+git clone https://github.com/Shihfeng-Hsu/muse-mac-lipsync.git
 cd muse-mac-lipsync
 bash setup_mlx_musetalk.sh
 ```
@@ -36,7 +57,7 @@ setup 腳本是**冪等**的(重跑只補缺的),它會:
 3. 下載權重(~2.5GB):MuseTalk 1.5 MLX fp16、DWPose 地標偵測、face-parse-bisent 融合
 4. 跑一次 benchmark 驗機(會印出這台晶片的 faces/s)
 
-## 快速開始 — 圖形介面
+## 快速開始(GUI)
 
 ```bash
 .venv/bin/python muse_app.py
@@ -48,7 +69,7 @@ setup 腳本是**冪等**的(重跑只補缺的),它會:
 - **新增 avatar**:上傳來源影片,做一次性地標偵測(慢,但這個 avatar 之後配任何音檔都不用重跑)
 - **批次**:多支音檔按檔名順序排隊渲染,輸出到 `outbox/`
 
-## 快速開始 — CLI
+## 快速開始(CLI)
 
 ```bash
 # 註冊 avatar(一次性地標偵測,之後永久重用)
@@ -71,7 +92,9 @@ muse.sh set-source 名字 ~/影片.mp4          # 來源影片搬家後重新指
 
 簡單模式(不建 avatar、單支直接跑):`./run_lipsync.sh <source.mp4> <audio> <out.mp4>`
 
-## 調速參數(加在指令最前面)
+## 調速參數
+
+加在指令最前面(環境變數形式):
 
 ```bash
 COOLDOWN_SEC=120 muse.sh render ...    # 段間休息縮到 2 分鐘(預設 300)
@@ -98,7 +121,9 @@ outbox/                         成品
 work/                           執行期中繼(可整包刪,自動重建)
 ```
 
-## 成本與速度(2026-09,M2 24GB 實測)
+## 成本與速度(M2 24GB 實測)
+
+實測時間 2026-09:
 
 | 項目 | 耗時 | 頻率 |
 |---|---|---|
@@ -133,4 +158,4 @@ work/                           執行期中繼(可整包刪,自動重建)
   - [xocialize/musetalk-mlx](https://github.com/xocialize/musetalk-mlx)(MLX 移植)+ [mlx-community/MuseTalk-1.5-fp16](https://huggingface.co/mlx-community/MuseTalk-1.5-fp16)(權重)
   - [TMElyralab/MuseTalk](https://github.com/TMElyralab/MuseTalk)(上游模型與融合程式碼)
   - [yzd-v/DWPose](https://huggingface.co/yzd-v/DWPose)(地標偵測)
-- 配音可搭配 [voxclone-mac](https://github.com/<你的帳號>/voxclone-mac)(VoxCPM2 本機聲音克隆),輸出音檔直接丟進本管線
+- 配音可搭配 [voxclone-mac](https://github.com/Shihfeng-Hsu/voxclone-mac)(VoxCPM2 本機聲音克隆),輸出音檔直接丟進本管線
