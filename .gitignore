@@ -1,0 +1,18 @@
+# runtime environment & engine (rebuild with: bash setup_mlx_musetalk.sh)
+.venv/
+musetalk-mlx/
+refs/
+
+# per-avatar caches & personal footage (frames/coords are heavy + personal)
+avatars/
+
+# queue, outputs, runtime scratch
+inbox/
+outbox/
+work/
+
+# python / os noise
+__pycache__/
+*.pyc
+*.part
+.DS_Store
